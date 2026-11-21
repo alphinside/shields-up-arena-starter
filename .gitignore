@@ -203,8 +203,15 @@ my_env.tfvars
 .saved_chats
 .env
 .google-agents-cli/
+deployment_metadata.json
+deployment_metadata.json.*
+.agents/mcp_config.json
+.cursor/mcp.json
+.vscode/mcp.json
+.mcp.json
+.codex/
+.claude/settings.local.json
 .sandbox-warm
-deployment_metadata.json.lock
 mcp-toolbox/bin/
 bin/
 toolbox

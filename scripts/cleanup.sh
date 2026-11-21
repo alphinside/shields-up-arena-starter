@@ -45,7 +45,7 @@ if [[ -n "$ENGINE_RESOURCE" ]]; then
   fi
   echo "Deleting agent runtime instance ${ENGINE_RESOURCE}..."
   uv run python scripts/engine.py delete
-  printf '{\n  "remote_agent_runtime_id": null,\n  "deployment_timestamp": null\n}\n' >deployment_metadata.json
+  rm -f deployment_metadata.json
 fi
 rm -f .sandbox-warm
 

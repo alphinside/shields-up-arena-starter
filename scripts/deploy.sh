@@ -28,6 +28,10 @@ fi
 export GOOGLE_CLOUD_PROJECT SCORER_SERVICE_ACCOUNT
 
 : "${GOOGLE_CLOUD_PROJECT:?Set GOOGLE_CLOUD_PROJECT in .env or export it}"
+if [[ "$GOOGLE_CLOUD_PROJECT" == "your-gcp-project-id" || "$GOOGLE_CLOUD_PROJECT" == "YOUR_GCP_PROJECT_ID" ]]; then
+  echo "Replace GOOGLE_CLOUD_PROJECT in .env with your real Google Cloud project ID." >&2
+  exit 1
+fi
 PROJECT="$GOOGLE_CLOUD_PROJECT"
 REGION="${GOOGLE_CLOUD_LOCATION:-${BIGQUERY_LOCATION:-us-central1}}"
 
@@ -42,10 +46,10 @@ retry() { for _ in 1 2 3 4 5 6; do "$@" && return; sleep 10; done; return 1; }
 echo "[1/6] Checking Agents CLI version..."
 version=$(agents-cli --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n 1 || true)
 IFS=. read -r major minor _ <<< "${version:-0.0.0}"
-if [[ "${major:-0}" -ne 1 || "${minor:-0}" -lt 12 ]]; then
+if [[ "$((10#${major:-0}))" -ne 1 || "$((10#${minor:-0}))" -lt 12 ]]; then
   echo "This repo needs Agents CLI >= 1.12.0 (< 2.0.0); this shell runs '${version:-none}'." >&2
   echo "Install or upgrade it with:" >&2
-  echo "  uv tool install --upgrade google-agents-cli && hash -r" >&2
+  echo '  uv tool install --upgrade google-agents-cli && uv tool update-shell && export PATH="$HOME/.local/bin:$PATH"' >&2
   exit 1
 fi
 echo "  agents-cli ${version} (ignore any 'scaffold upgrade' notice during deploy)"
