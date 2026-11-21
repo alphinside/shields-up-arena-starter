@@ -101,12 +101,18 @@ AGENTS.md                            pointer to GEMINI.md for multi-agent tools
    # Antigravity:
    agy plugin install google-cloud-developer
 
+   # Gemini CLI:
+   gemini extensions install https://github.com/google/skills
+
    # Claude Code:
    claude plugin marketplace add google/skills
    claude plugin install google-cloud-developer@google-plugins
+
+   # Cursor, Codex, or other agents:
+   npx skills add google/skills --skill gcloud --skill google-cloud-recipe-auth
    ```
 
-3. Set your project, copy `.env.example` to `.env`, set `GOOGLE_CLOUD_PROJECT`, and run `./scripts/deploy.sh`.
+3. Set your project, run `uv sync`, copy `.env.example` to `.env`, set `GOOGLE_CLOUD_PROJECT`, and run `./scripts/deploy.sh`.
 
 ### What `scripts/deploy.sh` Provisions
 
@@ -118,10 +124,10 @@ Wait **2 to 3 minutes** after the first deploy for IAM bindings to propagate, th
 projects/<project>/locations/us-central1/reasoningEngines/<id>
 ```
 
-If you deployed before setting `SCORER_SERVICE_ACCOUNT`, or if the Command Center reports a `422` permission error, run:
+If you cleared `SCORER_SERVICE_ACCOUNT` in `.env` before deploying, or if the Command Center reports a `422` permission error, run:
 
 ```bash
-./scripts/grant-scorer.sh
+./scripts/grant-scorer.sh [scorer-service-account-email]
 ```
 
 ## Fast Iteration (Redeploying After Edits)
