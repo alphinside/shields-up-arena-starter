@@ -34,8 +34,6 @@ from google.adk.tools.mcp_tool.mcp_session_manager import (
 from google.adk.tools.skill_toolset import SkillToolset
 from google.genai import types
 
-from .plugins.traffic_log_plugin import TrafficLogPlugin
-
 MODEL = "gemini-3.8-flash"
 TOOLBOX_URL = os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5000")
 SKILLS_DIR = os.path.join(os.path.dirname(__file__), "skills")
@@ -101,5 +99,5 @@ app = App(
     # ADK's REST routes take the app name from the agent directory ("app"),
     # not from this field. Kept in sync so /a2a/{name} matches.
     name="app",
-    plugins=[TrafficLogPlugin()],
+    plugins=[],
 )

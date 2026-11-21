@@ -28,7 +28,7 @@ app/
   agent.py                           root agent: MCP Toolbox tools, code executor, skill, App plugins
   fast_api_app.py                    FastAPI app with ADK, A2A, and agent runtime routes
   app_utils/                         session services, A2A routes, reasoning_engine adapter
-  plugins/traffic_log_plugin.py      structured JSON prompt/response logging per turn
+  plugins/                           ADK BasePlugin package for request and tool guardrails
   skills/retail-analytics/           retail analytics skill and reference playbooks
 mcp-toolbox/
   tools.yaml                         BigQuery source and tools served over MCP
@@ -129,7 +129,7 @@ AGENTS.md                            pointer to GEMINI.md for multi-agent tools
    codex plugin marketplace add google/skills
    codex plugin add google-cloud-developer@google-plugins
 
-   # Gemini CLI, Cursor, or other agents:
+   # Cursor, Windsurf, or other agents:
    npx skills add google/skills --skill gcloud --skill google-cloud-recipe-auth
    ```
 

@@ -13,7 +13,7 @@ This repository holds a deliberately open retail-analytics ADK agent for the Shi
 
 - `app/agent.py`: root ADK `Agent` (`retail_agent`), `INSTRUCTION`, `code_executor`, `McpToolset`, `SkillToolset`, and `App` plugins.
 - `app/fast_api_app.py`: FastAPI server exposing `/run`, A2A routes, and agent runtime routes (`app.name == "app"`).
-- `app/plugins/`: ADK `BasePlugin` modules (starter includes `traffic_log_plugin.py` logging one JSON `PROMPT` and `RESPONSE` line per turn).
+- `app/plugins/`: ADK `BasePlugin` package (empty in starter; attach deterministic request, tool, and output guardrails on `App`).
 - `app/skills/retail-analytics/`: `SkillToolset` playbooks (`SKILL.md` and `references/`).
 - `mcp-toolbox/tools.yaml`: BigQuery source and MCP tool definitions served by Cloud Run (`retail-toolbox`).
 - `scripts/load_data.py`: seeds four synthetic BigQuery tables in dataset `harden_retail`.
