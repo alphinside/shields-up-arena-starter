@@ -34,6 +34,7 @@ mcp-toolbox/
   tools.yaml                         BigQuery source and tools served over MCP
 scripts/
   load_data.py                       loads the synthetic harden_retail dataset
+  check_contract.py                  checks frozen agent and MCP contracts offline
   run_toolbox.sh                     runs MCP Toolbox locally on 127.0.0.1:5000
   deploy.sh                          deploys Cloud Run Toolbox, agent runtime, IAM, and warm sandbox
   grant-scorer.sh                    grants the Arena scorer read and query access to the engine
@@ -161,10 +162,10 @@ uv run python scripts/load_data.py
 uv run uvicorn app.fast_api_app:app --port 8000   # terminal 2
 ```
 
-Run unit tests before deploying:
+Check frozen agent and MCP contracts offline before deploying:
 
 ```bash
-uv run pytest
+uv run python scripts/check_contract.py
 ```
 
 ## Verify the Starting Gaps

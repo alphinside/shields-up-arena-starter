@@ -42,6 +42,8 @@ if [[ "$version" != 1.12.* ]]; then
   exit 1
 fi
 echo "  agents-cli ${version}"
+uv sync --quiet
+uv run python scripts/check_contract.py
 
 if [[ -z "${SKIP_SETUP:-}" ]]; then
   echo "[2/6] Enabling required APIs..."

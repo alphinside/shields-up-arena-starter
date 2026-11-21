@@ -46,4 +46,4 @@ The Command Center requires these interfaces to remain intact:
   gcloud logging read 'resource.type="aiplatform.googleapis.com/ReasoningEngine"' \
     --project="$GOOGLE_CLOUD_PROJECT" --limit=20 --format="value(timestamp,jsonPayload.message)"
   ```
-- **Tests**: run `uv run pytest`. Note that `tests/unit/test_starter.py` asserts the initial unhardened setup, so update unit tests alongside your security controls.
+- **Contract checks**: run `uv run python scripts/check_contract.py` offline before deploying (`scripts/deploy.sh` also runs it). Do not add or require `pytest` unit tests under `tests/unit/`.
