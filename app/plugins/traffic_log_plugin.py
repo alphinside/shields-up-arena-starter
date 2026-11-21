@@ -14,7 +14,7 @@
 
 """Logs each turn's prompt and the model's responses to stdout.
 
-Agent Runtime ships stdout straight to Cloud Logging, so the console logs show
+Agent runtime ships stdout straight to Cloud Logging, so the console logs show
 what was sent and what came back for any probe run against this agent.
 """
 
@@ -61,7 +61,7 @@ def _text_of(content: types.Content | None) -> str:
         return ""
     chunks = []
     for part in content.parts:
-        if part.text:
+        if part.text and not part.thought:
             chunks.append(part.text)
         elif part.function_call:
             chunks.append(f"[calls {part.function_call.name}({part.function_call.args})]")

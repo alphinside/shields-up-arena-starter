@@ -48,7 +48,7 @@ def get_session_service():
 
         return VertexAiSessionService(
             project=os.environ.get("GOOGLE_CLOUD_PROJECT"),
-            # Prefer the runtime-injected Agent Runtime region over GOOGLE_CLOUD_LOCATION.
+            # Prefer the runtime-injected agent runtime region over GOOGLE_CLOUD_LOCATION.
             location=os.environ.get("GOOGLE_CLOUD_AGENT_ENGINE_LOCATION")
             or os.environ.get("GOOGLE_CLOUD_LOCATION"),
             agent_engine_id=agent_engine_id,

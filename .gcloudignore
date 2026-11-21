@@ -8,8 +8,8 @@
 .gcloudignore
 
 # MCP Toolbox runs on private Cloud Run (config mounted from Secret Manager),
-# never inside the Agent Runtime container. Excluding /mcp-toolbox/ also keeps
-# the 300+ MB local toolbox binary out of the inline Agent Runtime upload.
+# never inside the agent runtime container. Excluding /mcp-toolbox/ also keeps
+# the 300+ MB local toolbox binary out of the inline agent runtime upload.
 /mcp-toolbox/
 /bin/
 /tests/

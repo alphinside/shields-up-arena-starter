@@ -1,4 +1,4 @@
-"""Helpers for the Agent Runtime instance named in deployment_metadata.json.
+"""Helpers for the agent runtime instance named in deployment_metadata.json.
 
 uv run python scripts/engine.py resource    print the engine resource name
 uv run python scripts/engine.py principal   print the agent's Agent Identity principal
@@ -26,7 +26,7 @@ def read_resource_name(metadata_path: Path | None = None) -> str:
         sys.exit(f"No {path.name} found. Run scripts/deploy.sh first.")
     name = json.loads(path.read_text()).get("remote_agent_runtime_id")
     if not name:
-        sys.exit(f"No Agent Runtime instance in {path.name}. Run scripts/deploy.sh first.")
+        sys.exit(f"No agent runtime instance in {path.name}. Run scripts/deploy.sh first.")
     return name
 
 

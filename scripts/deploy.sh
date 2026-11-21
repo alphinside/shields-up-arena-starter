@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Deploys the starter agent to Agent Runtime with Agent Identity and a private
+# Deploys the starter agent to agent runtime with Agent Identity and a private
 # Cloud Run MCP Toolbox service.
 #
-# Safe to rerun: updates the Toolbox service and Agent Runtime instance in place
+# Safe to rerun: updates the Toolbox service and agent runtime instance in place
 # and keeps the same Agent Identity principal.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -103,7 +103,7 @@ TOOLBOX_CLOUD_URL=$(gcloud run services describe "$TOOLBOX_SERVICE" \
   --project="$PROJECT" --region="$REGION" --format='value(status.url)')
 echo "  Toolbox URL: ${TOOLBOX_CLOUD_URL}"
 
-echo "[5/6] Deploying agent to Agent Runtime with Agent Identity..."
+echo "[5/6] Deploying agent to agent runtime with Agent Identity..."
 # agents-cli resets the two OTel content capture variables on every deploy, so
 # pass all three trace variables and TOOLBOX_URL each time.
 agents-cli deploy --agent-identity --project="$PROJECT" --no-confirm-project \

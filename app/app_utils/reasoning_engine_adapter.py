@@ -15,11 +15,11 @@
 """Serve the reasoning_engine ``{class_method, input}`` contract over HTTP.
 
 Exists to support the Google Cloud console playground and Gemini ADK
-registration, which both invoke the engine through this contract. Agent Runtime
+registration, which both invoke the engine through this contract. agent runtime
 forwards calls to ``/api/reasoning_engine`` (sync) and
 ``/api/stream_reasoning_engine`` (streaming); dispatch is limited to the
 :class:`AdkApp` ``register_operations()`` methods so the wire output matches an
-agent packaged for Agent Runtime.
+agent packaged for agent runtime.
 """
 
 import inspect

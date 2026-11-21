@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Grants the Shields Up Arena scorer service account read and query access to
-# this agent's single Agent Runtime instance.
+# this agent's single agent runtime instance.
 #
 # Creates or updates a project custom role holding only:
 #   - aiplatform.reasoningEngines.get
@@ -50,7 +50,7 @@ if gcloud iam roles describe "$ROLE_ID" --project="$PROJECT" &>/dev/null; then
 else
   gcloud iam roles create "$ROLE_ID" --project="$PROJECT" \
     --title="Shields Up Arena Scorer" \
-    --description="Allows the Shields Up Arena scorer to inspect and query one Agent Runtime instance." \
+    --description="Allows the Shields Up Arena scorer to inspect and query one agent runtime instance." \
     --permissions="$PERMS" --stage=GA --quiet >/dev/null
 fi
 

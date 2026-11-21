@@ -43,7 +43,7 @@ if [[ -n "$ENGINE_RESOURCE" ]]; then
         echo "Removed ${ROLE} from ${PRINCIPAL}."
     done
   fi
-  echo "Deleting Agent Runtime instance ${ENGINE_RESOURCE}..."
+  echo "Deleting agent runtime instance ${ENGINE_RESOURCE}..."
   uv run python scripts/engine.py delete
   printf '{\n  "remote_agent_runtime_id": null,\n  "deployment_timestamp": null\n}\n' >deployment_metadata.json
 fi
