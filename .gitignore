@@ -218,3 +218,10 @@ tools/a2a-inspector/
 *.pem
 *-key.json
 credentials*.json
+
+# Shields Up Arena helper skill (installed mid-challenge)
+.agents/skills/shields-up-coach/
+.gemini/skills/shields-up-coach/
+.claude/skills/shields-up-coach/
+COACH_GUIDE.md
+learning-report.html
