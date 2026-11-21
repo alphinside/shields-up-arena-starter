@@ -69,8 +69,12 @@ AGENTS.md                            pointer to GEMINI.md for multi-agent tools
 
    ```bash
    # Antigravity (pre-installed in Cloud Shell):
+   gcloud services enable aiplatform.googleapis.com
    agents-cli setup --skip-auth
    agy plugin install google-cloud-developer
+   export AGY_ADC_AUTH=true
+   export CLOUDSDK_CORE_PROJECT=$(gcloud config get-value project)
+   export GOOGLE_CLOUD_QUOTA_PROJECT=$(gcloud config get-value project)
 
    # Claude Code (install CLI first in Cloud Shell):
    npm install -g @anthropic-ai/claude-code
@@ -84,6 +88,8 @@ AGENTS.md                            pointer to GEMINI.md for multi-agent tools
    codex plugin marketplace add google/skills
    codex plugin add google-cloud-developer@google-plugins
    ```
+
+   Run those three export lines in your workspace shell (not inside `.env`) so Antigravity CLI uses your trial-billed project.
 
 3. Install Python dependencies:
 
@@ -119,7 +125,11 @@ AGENTS.md                            pointer to GEMINI.md for multi-agent tools
 
    ```bash
    # Antigravity:
+   gcloud services enable aiplatform.googleapis.com
    agy plugin install google-cloud-developer
+   export AGY_ADC_AUTH=true
+   export CLOUDSDK_CORE_PROJECT=$(gcloud config get-value project)
+   export GOOGLE_CLOUD_QUOTA_PROJECT=$(gcloud config get-value project)
 
    # Claude Code:
    claude plugin marketplace add google/skills
@@ -150,6 +160,20 @@ If you cleared `SCORER_SERVICE_ACCOUNT` in `.env` before deploying, or if the Co
 ```bash
 ./scripts/grant-scorer.sh [scorer-service-account-email]
 ```
+
+### Explore and Inspect Evaluation Traces
+
+1. Open your coding agent inside the workspace while IAM bindings propagate and send:
+
+   ```text
+   Onboard me on the current project. Explain the ADK agent architecture, MCP Toolbox tools, code execution setup, and where untrusted inputs cross trust boundaries.
+   ```
+
+2. After your initial Command Center submission finishes, ask your coding agent to fetch live telemetry:
+
+   ```text
+   I just submitted my agent for evaluation. Use the Google Cloud Developer plugin and ADK skills to show me the recent prompts, tool calls, and traces my agent received for further analysis.
+   ```
 
 ## Fast Iteration (Redeploying After Edits)
 
