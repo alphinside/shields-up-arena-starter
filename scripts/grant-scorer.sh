@@ -14,6 +14,7 @@ cd "$(dirname "$0")/.."
 ARG_SCORER="${1:-}"
 ENV_SCORER="${SCORER_SERVICE_ACCOUNT:-}"
 ENV_PROJECT="${GOOGLE_CLOUD_PROJECT:-}"
+DEFAULT_SCORER_SA="red-teamer-sa@alvin-exploratory-2.iam.gserviceaccount.com"
 
 if [[ -f .env ]]; then
   set -a
@@ -22,7 +23,7 @@ if [[ -f .env ]]; then
   set +a
 fi
 
-SCORER_SERVICE_ACCOUNT="${ARG_SCORER:-${ENV_SCORER:-${SCORER_SERVICE_ACCOUNT:-}}}"
+SCORER_SERVICE_ACCOUNT="${ARG_SCORER:-${ENV_SCORER:-${SCORER_SERVICE_ACCOUNT:-$DEFAULT_SCORER_SA}}}"
 GOOGLE_CLOUD_PROJECT="${ENV_PROJECT:-${GOOGLE_CLOUD_PROJECT:-}}"
 
 : "${GOOGLE_CLOUD_PROJECT:?Set GOOGLE_CLOUD_PROJECT in .env or export it}"

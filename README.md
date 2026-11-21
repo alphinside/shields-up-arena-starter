@@ -8,7 +8,7 @@ A retail-analytics agent over BigQuery, built with [ADK](https://adk.dev) and `g
 
 ## Challenge Overview and Scoring
 
-Your goal is to reach **20 / 20** on the Shields Up Arena Command Center without breaking normal agent features.
+Your goal is to reach **20 / 20** on the [Shields Up Arena Command Center](https://g.dev/cloud/kdd-q4-26-hack) without breaking normal agent features.
 
 | Category | Count | Points | Notes |
 |---|---|---|---|
@@ -71,7 +71,7 @@ AGENTS.md                            pointer to GEMINI.md for multi-agent tools
    uv sync
    ```
 
-3. Copy `.env.example` to `.env`, then set `GOOGLE_CLOUD_PROJECT` and the `SCORER_SERVICE_ACCOUNT` shared by organizers:
+3. Copy `.env.example` to `.env`, then set `GOOGLE_CLOUD_PROJECT`. (`SCORER_SERVICE_ACCOUNT` already defaults to `red-teamer-sa@alvin-exploratory-2.iam.gserviceaccount.com`.)
 
    ```bash
    cp .env.example .env
@@ -87,18 +87,32 @@ AGENTS.md                            pointer to GEMINI.md for multi-agent tools
 
 ### Option B: Local Workstation
 
-Authenticate first, then follow steps 2 to 4 above:
+1. Install the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install), `uv`, Python 3.11-3.13, and [Agents CLI](https://google.github.io/agents-cli/):
 
-```bash
-gcloud auth login
-gcloud auth application-default login
-```
+   ```bash
+   gcloud auth login
+   gcloud auth application-default login
+   uvx google-agents-cli setup
+   ```
+
+2. Add the [Google Cloud Developer plugin](https://cloud.google.com/blog/topics/developers-practitioners/introducing-the-google-cloud-developer-plugin-for-ai-coding-agents) to your coding agent for live Google Cloud docs and `gcloud` guardrails:
+
+   ```bash
+   # Antigravity:
+   agy plugin install google-cloud-developer
+
+   # Claude Code:
+   claude plugin marketplace add google/skills
+   claude plugin install google-cloud-developer@google-plugins
+   ```
+
+3. Set your project, copy `.env.example` to `.env`, set `GOOGLE_CLOUD_PROJECT`, and run `./scripts/deploy.sh`.
 
 ### What `scripts/deploy.sh` Provisions
 
 The deploy script enables APIs, loads synthetic `harden_retail` tables in BigQuery, and deploys private Cloud Run MCP Toolbox (`retail-toolbox`). It then deploys this agent to agent runtime with Agent Identity, grants `roles/run.invoker` on `retail-toolbox`, binds `SCORER_SERVICE_ACCOUNT` via `shieldsUpArenaScorer`, and warms one code sandbox.
 
-Wait **2 to 3 minutes** after the first deploy for IAM bindings to propagate, then paste the printed resource name into the Command Center:
+Wait **2 to 3 minutes** after the first deploy for IAM bindings to propagate, then paste the printed resource name into the [Command Center](https://g.dev/cloud/kdd-q4-26-hack):
 
 ```text
 projects/<project>/locations/us-central1/reasoningEngines/<id>

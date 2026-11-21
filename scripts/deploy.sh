@@ -9,6 +9,7 @@ cd "$(dirname "$0")/.."
 
 ENV_PROJECT="${GOOGLE_CLOUD_PROJECT:-}"
 ENV_SCORER="${SCORER_SERVICE_ACCOUNT:-}"
+DEFAULT_SCORER_SA="red-teamer-sa@alvin-exploratory-2.iam.gserviceaccount.com"
 
 if [[ -f .env ]]; then
   set -a
@@ -18,7 +19,7 @@ if [[ -f .env ]]; then
 fi
 
 GOOGLE_CLOUD_PROJECT="${ENV_PROJECT:-${GOOGLE_CLOUD_PROJECT:-}}"
-SCORER_SERVICE_ACCOUNT="${ENV_SCORER:-${SCORER_SERVICE_ACCOUNT:-}}"
+SCORER_SERVICE_ACCOUNT="${ENV_SCORER:-${SCORER_SERVICE_ACCOUNT:-$DEFAULT_SCORER_SA}}"
 export GOOGLE_CLOUD_PROJECT SCORER_SERVICE_ACCOUNT
 
 : "${GOOGLE_CLOUD_PROJECT:?Set GOOGLE_CLOUD_PROJECT in .env or export it}"
@@ -133,7 +134,7 @@ fi
 
 ENGINE_RESOURCE=$(uv run python scripts/engine.py resource)
 echo
-echo "Deploy complete. Paste this resource name into the Command Center:"
+echo "Deploy complete. Paste this resource name into https://g.dev/cloud/kdd-q4-26-hack :"
 echo "  ${ENGINE_RESOURCE}"
 echo
 echo "If this is the first deploy, wait 2 to 3 minutes for IAM bindings to propagate."
