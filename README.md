@@ -50,7 +50,7 @@ AGENTS.md                            pointer to GEMINI.md for multi-agent tools
 |---|---|---|
 | Python | 3.11-3.13 | |
 | `uv` | | dependency management |
-| `agents-cli` | `1.12.x` | preinstalled in Cloud Shell |
+| `agents-cli` | `>= 1.12.0` (`1.x`) | preinstalled in Cloud Shell |
 | `google-adk` | `2.14.0` | pinned in `pyproject.toml` |
 | Google Cloud project | | billing enabled, `us-central1` |
 

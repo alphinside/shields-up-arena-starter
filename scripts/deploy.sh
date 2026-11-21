@@ -40,14 +40,15 @@ TOOLBOX_IMAGE="us-central1-docker.pkg.dev/database-toolbox/toolbox/toolbox:1.12.
 retry() { for _ in 1 2 3 4 5 6; do "$@" && return; sleep 10; done; return 1; }
 
 echo "[1/6] Checking Agents CLI version..."
-version=$(agents-cli --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)
-if [[ "$version" != 1.12.* ]]; then
-  echo "This repo needs Agents CLI 1.12.x; this shell runs '${version:-none}'." >&2
-  echo "Cloud Shell ships 1.12.0, but an older copy in ~/.local/bin comes first on PATH. Remove it with:" >&2
-  echo "  uv tool uninstall google-agents-cli && hash -r" >&2
+version=$(agents-cli --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n 1 || true)
+IFS=. read -r major minor _ <<< "${version:-0.0.0}"
+if [[ "${major:-0}" -ne 1 || "${minor:-0}" -lt 12 ]]; then
+  echo "This repo needs Agents CLI >= 1.12.0 (< 2.0.0); this shell runs '${version:-none}'." >&2
+  echo "Install or upgrade it with:" >&2
+  echo "  uv tool install --upgrade google-agents-cli && hash -r" >&2
   exit 1
 fi
-echo "  agents-cli ${version}"
+echo "  agents-cli ${version} (ignore any 'scaffold upgrade' notice during deploy)"
 uv sync --quiet
 uv run python scripts/check_contract.py
 
@@ -86,19 +87,27 @@ for ROLE in roles/bigquery.jobUser roles/bigquery.dataEditor; do
     --condition=None --quiet >/dev/null
 done
 
+created_secret=0
 if gcloud secrets describe "$TOOLBOX_SECRET" --project="$PROJECT" &>/dev/null; then
   gcloud secrets versions add "$TOOLBOX_SECRET" --project="$PROJECT" \
     --data-file=mcp-toolbox/tools.yaml >/dev/null
 else
   gcloud secrets create "$TOOLBOX_SECRET" --project="$PROJECT" \
     --replication-policy=automatic --data-file=mcp-toolbox/tools.yaml >/dev/null
+  created_secret=1
 fi
 
 retry gcloud secrets add-iam-policy-binding "$TOOLBOX_SECRET" --project="$PROJECT" \
   --member="serviceAccount:${TOOLBOX_SA}" --role=roles/secretmanager.secretAccessor \
   --condition=None --quiet >/dev/null
 
-gcloud run deploy "$TOOLBOX_SERVICE" --project="$PROJECT" --region="$REGION" \
+# Newly created secrets, service accounts, and Cloud Run service agents can
+# take a few seconds before Cloud Run's secret preflight sees IAM propagation.
+if [[ "$created_secret" -eq 1 ]]; then
+  sleep 5
+fi
+
+retry gcloud run deploy "$TOOLBOX_SERVICE" --project="$PROJECT" --region="$REGION" \
   --image="$TOOLBOX_IMAGE" \
   --service-account="$TOOLBOX_SA" \
   --no-allow-unauthenticated \
@@ -119,7 +128,7 @@ agents-cli deploy --agent-identity --project="$PROJECT" --no-confirm-project \
 
 PRINCIPAL=$(uv run python scripts/engine.py principal)
 echo "  Agent Identity: ${PRINCIPAL}"
-gcloud run services add-iam-policy-binding "$TOOLBOX_SERVICE" \
+retry gcloud run services add-iam-policy-binding "$TOOLBOX_SERVICE" \
   --project="$PROJECT" --region="$REGION" \
   --member="$PRINCIPAL" --role=roles/run.invoker --quiet >/dev/null
 
