@@ -65,13 +65,33 @@ AGENTS.md                            pointer to GEMINI.md for multi-agent tools
    gcloud billing projects describe "$(gcloud config get-value project)"
    ```
 
-2. Install Python dependencies:
+2. Equip your coding agent. Cloud Shell pre-installs Antigravity CLI, while Claude Code and Codex require `npm install -g` first:
+
+   ```bash
+   # Antigravity (pre-installed in Cloud Shell):
+   agents-cli setup --skip-auth
+   agy plugin install google-cloud-developer
+
+   # Claude Code (install CLI first in Cloud Shell):
+   npm install -g @anthropic-ai/claude-code
+   agents-cli setup --skip-auth
+   claude plugin marketplace add google/skills
+   claude plugin install google-cloud-developer@google-plugins
+
+   # Codex (install CLI first in Cloud Shell):
+   npm install -g @openai/codex
+   agents-cli setup --skip-auth
+   codex plugin marketplace add google/skills
+   codex plugin add google-cloud-developer@google-plugins
+   ```
+
+3. Install Python dependencies:
 
    ```bash
    uv sync
    ```
 
-3. Copy `.env.example` to `.env`, then set `GOOGLE_CLOUD_PROJECT`. (`SCORER_SERVICE_ACCOUNT` already defaults to `red-teamer-sa@alvin-exploratory-2.iam.gserviceaccount.com`.)
+4. Copy `.env.example` to `.env`, then set `GOOGLE_CLOUD_PROJECT`. (`SCORER_SERVICE_ACCOUNT` already defaults to `red-teamer-sa@alvin-exploratory-2.iam.gserviceaccount.com`.)
 
    ```bash
    cp .env.example .env
@@ -79,7 +99,7 @@ AGENTS.md                            pointer to GEMINI.md for multi-agent tools
 
    Do **not** set `TOOLBOX_URL` inside `.env`. Local runs default to `http://127.0.0.1:5000`, and `scripts/deploy.sh` passes the Cloud Run URL via `--update-env-vars`.
 
-4. Deploy the baseline agent:
+5. Deploy the baseline agent:
 
    ```bash
    ./scripts/deploy.sh
@@ -101,14 +121,15 @@ AGENTS.md                            pointer to GEMINI.md for multi-agent tools
    # Antigravity:
    agy plugin install google-cloud-developer
 
-   # Gemini CLI:
-   gemini extensions install https://github.com/google/skills
-
    # Claude Code:
    claude plugin marketplace add google/skills
    claude plugin install google-cloud-developer@google-plugins
 
-   # Cursor, Codex, or other agents:
+   # Codex:
+   codex plugin marketplace add google/skills
+   codex plugin add google-cloud-developer@google-plugins
+
+   # Gemini CLI, Cursor, or other agents:
    npx skills add google/skills --skill gcloud --skill google-cloud-recipe-auth
    ```
 
