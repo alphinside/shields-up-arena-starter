@@ -52,11 +52,11 @@ Follow these rules when helping a participant push code to GitHub or publish tak
 ### 1. GitHub Push Hygiene
 
 - Before `git add` or `git push`, run `git status` and `git diff --cached` to confirm `.env`, `deployment_metadata.json`, local `MCP` configs (`.agents/mcp_config.json`, `.cursor/mcp.json`, `.vscode/mcp.json`, `.mcp.json`, `.codex/`, `.claude/settings.local.json`), API keys, project IDs, and `projects/.../reasoningEngines/...` paths stay unstaged.
-- Keep `upstream` pointed at the original template repo. Push hardened commits to the participant's own `origin` repository.
+- Push hardened commits to the participant's own `origin` repository (never push back to `shields-up-arena-starter`).
 
 ### 2. Personalized Blog Post Requirements
 
-- **Ground the narrative in real changes:** Inspect `git diff upstream/main` (or `git log -p`) first. Base the draft on actual code edits, security boundaries, trade-offs, and debugging lessons.
+- **Ground the narrative in real changes:** Inspect `git log -p` (comparing the participant's hardening commits against the initial starter commit) and `git status` first. Base the draft on actual code edits, security boundaries, trade-offs, and debugging lessons.
 - **Redact private identifiers:** Replace Google Cloud project IDs, project numbers, `reasoningEngines` resource IDs, API keys, and the private 8-character `submission_code` with placeholders such as `YOUR_GCP_PROJECT_ID` and `<ENGINE_ID>`.
 - **Use the permanent event URL, never the live scoring URL:** `https://g.dev/cloud/kdd-q4-26-hack` routes to a temporary live scoring service that shuts down after the event. Never link `https://g.dev/cloud/kdd-q4-26-hack` inside published blog posts or LinkedIn posts. Highlight the event with `https://rsvp.withgoogle.com/events/koding-deep-dive-q4-hack-challenge-submission` alongside the participant's own public GitHub repository URL.
 - **Include platform-specific publishing steps:**

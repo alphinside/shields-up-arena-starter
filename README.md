@@ -194,9 +194,17 @@ AGENTS.md                            central coding-agent docs, contracts, and b
 
    Check that the printed `GOOGLE_CLOUD_PROJECT` line matches your project ID. Do **not** set `TOOLBOX_URL` inside `.env`. Local runs default to `http://127.0.0.1:5000`, and `scripts/deploy.sh` passes the Cloud Run URL via `--update-env-vars`.
 
-6. *(Optional - required for the `$100` Google Cloud credits draw)* Create an empty public repository at `https://github.com/new` so you track changes in your Git workspace early. Leave **Add a README file**, **.gitignore**, and **Choose a license** unchecked so the new repository stays empty.
+6. Create an empty public repository at `https://github.com/new` so you track changes in your Git workspace early. Leave **Add a README file**, **.gitignore**, and **Choose a license** unchecked so the new repository stays empty.
 
-7. *(Optional - after Step 6)* Point `origin` to your new GitHub repository and push the clean baseline (`.gitignore` excludes `.env` automatically):
+7. Sign in to GitHub CLI (Cloud Shell preinstalls `gh`) and configure Git HTTPS credentials:
+
+   ```bash
+   gh auth login && gh auth setup-git
+   ```
+
+   Select **GitHub.com**, **HTTPS**, and **Login with a web browser** when GitHub prompts for credentials.
+
+8. Point `origin` to your new GitHub repository and push the clean baseline (`.gitignore` excludes `.env` automatically):
 
    ```bash
    git remote set-url origin YOUR_GITHUB_REPO_URL
@@ -204,9 +212,9 @@ AGENTS.md                            central coding-agent docs, contracts, and b
    git push -u origin main
    ```
 
-   Use `git remote set-url origin` because `git clone` already registers `origin`. In Cloud Shell, run `gh auth login && gh auth setup-git` first if GitHub prompts for credentials.
+   Use `git remote set-url origin` because `git clone` already registers `origin`.
 
-8. Deploy the baseline agent:
+9. Deploy the baseline agent:
 
    ```bash
    ./scripts/deploy.sh
@@ -348,9 +356,9 @@ AGENTS.md                            central coding-agent docs, contracts, and b
    fi
    ```
 
-6. *(Optional - required for the `$100` Google Cloud credits draw)* Create an empty public repository at `https://github.com/new`. Leave **Add a README file**, **.gitignore**, and **Choose a license** unchecked so the new repository stays empty.
+6. Create an empty public repository at `https://github.com/new`. Leave **Add a README file**, **.gitignore**, and **Choose a license** unchecked so the new repository stays empty.
 
-7. *(Optional - after Step 6)* Point `origin` to your new GitHub repository and push the clean baseline (`.gitignore` excludes `.env` automatically):
+7. Point `origin` to your new GitHub repository and push the clean baseline (`.gitignore` excludes `.env` automatically):
 
    ```bash
    git remote set-url origin YOUR_GITHUB_REPO_URL
@@ -408,14 +416,13 @@ Always redeploy through `scripts/deploy.sh` instead of bare `agents-cli deploy`.
 
 Join the challenge for a chance to win cool swag. Complete Steps 1-4 below and include your hardened GitHub repository, blog post, and LinkedIn link for a chance to win **$100 in Google Cloud credits**.
 
-1. Add `upstream` (for comparing your changes against the starter) and inspect `git status` first:
+1. Check `git status` first so `.env`, `deployment_metadata.json`, and local MCP config files stay untracked (`.gitignore` ignores them automatically):
 
    ```bash
-   git remote add upstream https://github.com/alphinside/shields-up-arena-starter.git 2>/dev/null || true
-   git fetch upstream --quiet && git status
+   git status
    ```
 
-   If you skipped Steps 6-7 earlier, create an empty repository at `https://github.com/new` and run `git remote set-url origin YOUR_GITHUB_REPO_URL` first. Check that `git status` excludes `.env`, `deployment_metadata.json`, and local MCP config files (`.gitignore` ignores them automatically). After checking `git status`, commit and push (if fresh Cloud Shell prompts for identity, run `git config --global user.name` and `git config --global user.email` first):
+   After checking `git status`, commit and push (if fresh Cloud Shell prompts for identity, run `git config --global user.name` and `git config --global user.email` first):
 
    ```bash
    git add -A && git commit -m "Harden retail ADK agent for Shields Up Arena" && git push -u origin main
@@ -424,7 +431,7 @@ Join the challenge for a chance to win cool swag. Complete Steps 1-4 below and i
 2. Prompt your coding agent to draft and guide a personalized blog post on `dev.to`, `Medium`, or your personal blog:
 
    ```text
-   I want to publish my learnings about this challenge to dev.to. Inspect my git diff against upstream/main, help me create a personalized draft on my learning journey and security takeaways, and guide me on how I can post it. Follow AGENTS.md: redact project IDs and engine paths, and highlight the event via https://rsvp.withgoogle.com/events/koding-deep-dive-q4-hack-challenge-submission (not g.dev/cloud/kdd-q4-26-hack) alongside my GitHub repo.
+   I want to publish my learnings about this challenge to dev.to. Inspect my hardening commits in git log -p (against the initial starter commit), help me create a personalized draft on my learning journey and security takeaways, and guide me on how I can post it. Follow AGENTS.md: redact project IDs and engine paths, and highlight the event via https://rsvp.withgoogle.com/events/koding-deep-dive-q4-hack-challenge-submission (not g.dev/cloud/kdd-q4-26-hack) alongside my GitHub repo.
    ```
 
    Because `https://g.dev/cloud/kdd-q4-26-hack` is a temporary live scoring URL, always link [the event claim page](https://rsvp.withgoogle.com/events/koding-deep-dive-q4-hack-challenge-submission) in blog posts.
