@@ -57,6 +57,8 @@ AGENTS.md                            central coding-agent docs, contracts, and b
 
 ## Setup and First Deploy
 
+> **Tip:** Organizers provide Google Cloud trial credits for this challenge. Authenticate **Antigravity (`agy`)** with those trial credits using `AGY_ADC_AUTH=true` (Cloud Shell preinstalls `agy`), so you need no paid coding-agent plan or separate API key.
+
 ### Option A: Google Cloud Shell (recommended)
 
 1. Set your active Google Cloud project (replace `YOUR_GCP_PROJECT_ID` before pressing Enter):
@@ -179,19 +181,6 @@ AGENTS.md                            central coding-agent docs, contracts, and b
    fi
    ```
 
-   If you use Antigravity (`agy`), run these three exports in the same workspace shell (not inside `.env`):
-
-   ```bash
-   PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
-   if [ -n "$PROJECT_ID" ] && [ "$PROJECT_ID" != "(unset)" ] && [ "$PROJECT_ID" != "YOUR_GCP_PROJECT_ID" ] && [ "$PROJECT_ID" != "your-gcp-project-id" ]; then
-     export AGY_ADC_AUTH=true
-     export CLOUDSDK_CORE_PROJECT="$PROJECT_ID"
-     export GOOGLE_CLOUD_QUOTA_PROJECT="$PROJECT_ID"
-   else
-     echo "ERROR: Set your real GCP project ID in Step 1 first." >&2
-   fi
-   ```
-
    Check that the printed `GOOGLE_CLOUD_PROJECT` line matches your project ID. Do **not** set `TOOLBOX_URL` inside `.env`. Local runs default to `http://127.0.0.1:5000`, and `scripts/deploy.sh` passes the Cloud Run URL via `--update-env-vars`.
 
 6. Create an empty public repository at `https://github.com/new` so you track changes in your Git workspace early. Leave **Add a README file**, **.gitignore**, and **Choose a license** unchecked so the new repository stays empty.
@@ -219,6 +208,23 @@ AGENTS.md                            central coding-agent docs, contracts, and b
    ```bash
    ./scripts/deploy.sh
    ```
+
+10. *(Antigravity `agy` users)* Set your trial-credit project exports and launch `agy` inside the workspace:
+
+    ```bash
+    [ -f agents-cli-manifest.yaml ] || cd shields-up-arena-starter
+    PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
+    if [ -n "$PROJECT_ID" ] && [ "$PROJECT_ID" != "(unset)" ] && [ "$PROJECT_ID" != "YOUR_GCP_PROJECT_ID" ] && [ "$PROJECT_ID" != "your-gcp-project-id" ]; then
+      export AGY_ADC_AUTH=true
+      export CLOUDSDK_CORE_PROJECT="$PROJECT_ID"
+      export GOOGLE_CLOUD_QUOTA_PROJECT="$PROJECT_ID"
+      agy
+    else
+      echo "ERROR: Set your real GCP project ID in Step 1 first." >&2
+    fi
+    ```
+
+    Accept the workspace trust prompt on first launch, then send the onboarding prompt below. Press `Ctrl+D` twice anytime to return to bash.
 
 ### Option B: Local Workstation
 
@@ -343,19 +349,6 @@ AGENTS.md                            central coding-agent docs, contracts, and b
    fi
    ```
 
-   If you use Antigravity (`agy`), run these three exports in the same workspace shell (not inside `.env`):
-
-   ```bash
-   PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
-   if [ -n "$PROJECT_ID" ] && [ "$PROJECT_ID" != "(unset)" ] && [ "$PROJECT_ID" != "YOUR_GCP_PROJECT_ID" ] && [ "$PROJECT_ID" != "your-gcp-project-id" ]; then
-     export AGY_ADC_AUTH=true
-     export CLOUDSDK_CORE_PROJECT="$PROJECT_ID"
-     export GOOGLE_CLOUD_QUOTA_PROJECT="$PROJECT_ID"
-   else
-     echo "ERROR: Set your real GCP project ID in Step 1 first." >&2
-   fi
-   ```
-
 6. Create an empty public repository at `https://github.com/new`. Leave **Add a README file**, **.gitignore**, and **Choose a license** unchecked so the new repository stays empty.
 
 7. Point `origin` to your new GitHub repository and push the clean baseline (`.gitignore` excludes `.env` automatically):
@@ -390,7 +383,7 @@ If you cleared `SCORER_SERVICE_ACCOUNT` in `.env` before deploying, or if the Co
 
 ### Explore and Inspect Evaluation Traces
 
-1. Open your coding agent inside the workspace while IAM bindings propagate and send:
+1. Launch your coding agent inside the workspace while IAM bindings propagate (on a local workstation with trial credits, run `PROJECT_ID=$(gcloud config get-value project) && AGY_ADC_AUTH=true CLOUDSDK_CORE_PROJECT="$PROJECT_ID" GOOGLE_CLOUD_QUOTA_PROJECT="$PROJECT_ID" agy`) and send:
 
    ```text
    Onboard me on the current project. Explain the ADK agent architecture, MCP Toolbox tools, code execution setup, and where untrusted inputs cross trust boundaries. Also verify the Google Cloud Developer plugin's Developer Knowledge MCP connection by looking up ADK BasePlugin callbacks.
