@@ -59,19 +59,31 @@ AGENTS.md                            central coding-agent docs, contracts, and b
 
 ### Option A: Google Cloud Shell (recommended)
 
-1. Replace `YOUR_GCP_PROJECT_ID`, set your active project, and confirm active billing:
+1. Set your active Google Cloud project (replace `YOUR_GCP_PROJECT_ID` before pressing Enter):
 
    ```bash
    gcloud config set project YOUR_GCP_PROJECT_ID
-   gcloud billing projects describe "$(gcloud config get-value project)"
    ```
 
-2. Install the [Google Cloud Developer plugin](https://github.com/google/skills/tree/main/plugins/cloud/google-cloud-developer) and configure its Developer Knowledge API. Run only the block for your coding agent.
-
-   **Antigravity (`agy`, pre-installed in Cloud Shell):**
+2. Check active billing and enable the required APIs:
 
    ```bash
+   gcloud billing projects describe "$(gcloud config get-value project)"
    gcloud services enable aiplatform.googleapis.com developerknowledge.googleapis.com apikeys.googleapis.com
+   ```
+
+3. Install or check your coding agent CLI (Cloud Shell preinstalls `agents-cli >= 1.12.0` and `agy`):
+
+   - **Antigravity (`agy`):** preinstalled ([Antigravity CLI Docs](https://antigravity.google/docs)). Check with `agy --version && agents-cli --version`.
+   - **Claude Code (`claude`):** install and sign in using [Claude Code Install Docs](https://code.claude.com/docs/en/overview).
+   - **OpenAI Codex CLI (`codex`):** install and sign in using [OpenAI Codex CLI Docs](https://github.com/openai/codex).
+   - **Cursor, VS Code, Windsurf, or other agents:** check your editor or CLI and read [Skills CLI Docs](https://www.skills.sh/).
+
+4. Install the [Google Cloud Developer plugin](https://github.com/google/skills/tree/main/plugins/cloud/google-cloud-developer) and configure its Developer Knowledge API. Run only the block for your coding agent:
+
+   **Antigravity (`agy`):**
+
+   ```bash
    agents-cli setup --skip-auth
    agy plugin install google-cloud-developer
    export DEVELOPERKNOWLEDGE_API_KEY=$(gcloud services api-keys create \
@@ -82,20 +94,15 @@ AGENTS.md                            central coding-agent docs, contracts, and b
      agy mcp add --header "X-Goog-Api-Key: $DEVELOPERKNOWLEDGE_API_KEY" \
        developer-knowledge https://developerknowledge.googleapis.com/mcp
    else
-     echo "ERROR: API key creation failed. Replace YOUR_GCP_PROJECT_ID and re-run." >&2
+     echo "ERROR: API key creation failed. Run Step 1 and Step 2 first, then re-run." >&2
    fi
-   export AGY_ADC_AUTH=true
-   export CLOUDSDK_CORE_PROJECT=$(gcloud config get-value project)
-   export GOOGLE_CLOUD_QUOTA_PROJECT=$(gcloud config get-value project)
    ```
 
-   `google-cloud-developer` uses OAuth `google_credentials` by default, which fails under headless `AGY_ADC_AUTH=true`. Running `agy mcp add` configures its `developer-knowledge` endpoint with your API key while keeping all plugin skills enabled. Run those three `export` lines in your workspace shell (not inside `.env`).
+   `google-cloud-developer` uses OAuth `google_credentials` by default, which fails under headless `AGY_ADC_AUTH=true`. Running `agy mcp add` configures its `developer-knowledge` endpoint with your API key while keeping all plugin skills enabled.
 
-   **Claude Code (installs CLI globally first in Cloud Shell):**
+   **Claude Code (`claude`):**
 
    ```bash
-   gcloud services enable developerknowledge.googleapis.com apikeys.googleapis.com
-   npm install -g @anthropic-ai/claude-code
    agents-cli setup --skip-auth
    claude plugin marketplace add google/skills
    claude plugin install google-cloud-developer@google-plugins
@@ -104,15 +111,13 @@ AGENTS.md                            central coding-agent docs, contracts, and b
      --api-target=service=developerknowledge.googleapis.com \
      --format="value(response.keyString)")
    if [ -z "$DEVELOPERKNOWLEDGE_API_KEY" ]; then
-     echo "ERROR: API key creation failed. Replace YOUR_GCP_PROJECT_ID and re-run." >&2
+     echo "ERROR: API key creation failed. Run Step 1 and Step 2 first, then re-run." >&2
    fi
    ```
 
-   **Codex (installs CLI globally first in Cloud Shell):**
+   **Codex (`codex`):**
 
    ```bash
-   gcloud services enable developerknowledge.googleapis.com apikeys.googleapis.com
-   npm install -g @openai/codex
    agents-cli setup --skip-auth
    codex plugin marketplace add google/skills
    codex plugin add google-cloud-developer@google-plugins
@@ -129,14 +134,13 @@ AGENTS.md                            central coding-agent docs, contracts, and b
    http_headers = { "X-Goog-Api-Key" = "$DEVELOPERKNOWLEDGE_API_KEY" }
    EOF
    else
-     echo "ERROR: API key creation failed. Replace YOUR_GCP_PROJECT_ID and re-run." >&2
+     echo "ERROR: API key creation failed. Run Step 1 and Step 2 first, then re-run." >&2
    fi
    ```
 
    **Cursor, VS Code, Windsurf, or other agents:**
 
    ```bash
-   gcloud services enable developerknowledge.googleapis.com apikeys.googleapis.com
    npx -y skills add google/agents-cli -g -y
    npx -y skills add google/skills -g \
      --skill gcloud --skill google-cloud-recipe-auth \
@@ -151,27 +155,46 @@ AGENTS.md                            central coding-agent docs, contracts, and b
      echo "MCP URL: https://developerknowledge.googleapis.com/mcp"
      echo "Header:  X-Goog-Api-Key: $DEVELOPERKNOWLEDGE_API_KEY"
    else
-     echo "ERROR: API key creation failed. Replace YOUR_GCP_PROJECT_ID and re-run." >&2
+     echo "ERROR: API key creation failed. Run Step 1 and Step 2 first, then re-run." >&2
    fi
    ```
 
-   For Claude Code, keep `DEVELOPERKNOWLEDGE_API_KEY` exported in the shell where you launch `claude` (for example in `~/.bashrc`) so the plugin's bundled `.mcp.json` sends your key. In Codex, a "not logged in" status next to `developer-knowledge` is normal with `http_headers` and does not block access. For other editors, add the printed URL and header under `"mcpServers"` in `.cursor/mcp.json` (or `"servers"` in `.vscode/mcp.json`).
+   For Claude Code, launch `claude` from this same shell (or export `DEVELOPERKNOWLEDGE_API_KEY` in `~/.bashrc`) so `.mcp.json` sends your key. In Codex, a "not logged in" status next to `developer-knowledge` is normal with `http_headers` and does not block access. For other editors, add the printed URL and header under `"mcpServers"` in `.cursor/mcp.json` (or `"servers"` in `.vscode/mcp.json`).
 
-3. Install Python dependencies:
+5. Clone the starter repository, install Python dependencies, and write your active project ID into `.env`. (`SCORER_SERVICE_ACCOUNT` already defaults to `red-teamer-sa@alvin-exploratory-2.iam.gserviceaccount.com`.)
 
    ```bash
+   if [ ! -f agents-cli-manifest.yaml ]; then
+     [ -d shields-up-arena-starter ] || git clone https://github.com/alphinside/shields-up-arena-starter.git
+     cd shields-up-arena-starter
+   fi
    uv sync
+   [ -f .env ] || cp .env.example .env
+   PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
+   if [ -n "$PROJECT_ID" ] && [ "$PROJECT_ID" != "(unset)" ] && [ "$PROJECT_ID" != "YOUR_GCP_PROJECT_ID" ] && [ "$PROJECT_ID" != "your-gcp-project-id" ]; then
+     sed -i.bak "s|^GOOGLE_CLOUD_PROJECT=.*|GOOGLE_CLOUD_PROJECT=$PROJECT_ID|" .env && rm -f .env.bak
+     grep '^GOOGLE_CLOUD_PROJECT=' .env
+   else
+     echo "ERROR: Set your real GCP project ID in Step 1 first, then re-run Step 5." >&2
+   fi
    ```
 
-4. Copy `.env.example` to `.env`, then set `GOOGLE_CLOUD_PROJECT`. (`SCORER_SERVICE_ACCOUNT` already defaults to `red-teamer-sa@alvin-exploratory-2.iam.gserviceaccount.com`.)
+   If you use Antigravity (`agy`), run these three exports in the same workspace shell (not inside `.env`):
 
    ```bash
-   cp .env.example .env
+   PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
+   if [ -n "$PROJECT_ID" ] && [ "$PROJECT_ID" != "(unset)" ] && [ "$PROJECT_ID" != "YOUR_GCP_PROJECT_ID" ] && [ "$PROJECT_ID" != "your-gcp-project-id" ]; then
+     export AGY_ADC_AUTH=true
+     export CLOUDSDK_CORE_PROJECT="$PROJECT_ID"
+     export GOOGLE_CLOUD_QUOTA_PROJECT="$PROJECT_ID"
+   else
+     echo "ERROR: Set your real GCP project ID in Step 1 first." >&2
+   fi
    ```
 
-   Do **not** set `TOOLBOX_URL` inside `.env`. Local runs default to `http://127.0.0.1:5000`, and `scripts/deploy.sh` passes the Cloud Run URL via `--update-env-vars`.
+   Check that the printed `GOOGLE_CLOUD_PROJECT` line matches your project ID. Do **not** set `TOOLBOX_URL` inside `.env`. Local runs default to `http://127.0.0.1:5000`, and `scripts/deploy.sh` passes the Cloud Run URL via `--update-env-vars`.
 
-5. Deploy the baseline agent:
+6. Deploy the baseline agent:
 
    ```bash
    ./scripts/deploy.sh
@@ -179,24 +202,34 @@ AGENTS.md                            central coding-agent docs, contracts, and b
 
 ### Option B: Local Workstation
 
-1. Install `git`, the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install), `uv`, Node.js (`npx`), Python 3.11-3.13, and your coding agent CLI (`agy`, `claude`, or `codex`). Replace `YOUR_GCP_PROJECT_ID`, authenticate, confirm billing, and install `agents-cli` onto `PATH`:
+1. Install `git`, the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install), `uv`, Node.js (`npx`), and Python 3.11-3.13. Then replace `YOUR_GCP_PROJECT_ID` to set your project ID:
+
+   ```bash
+   gcloud config set project YOUR_GCP_PROJECT_ID
+   ```
+
+2. Sign in with your Google Cloud account, check active billing (`billingEnabled: true`), and enable the required APIs:
 
    ```bash
    gcloud auth login
-   gcloud config set project YOUR_GCP_PROJECT_ID
    gcloud auth application-default login
    gcloud billing projects describe "$(gcloud config get-value project)"
-   uv tool install --upgrade google-agents-cli
-   uv tool update-shell && export PATH="$HOME/.local/bin:$PATH"
-   agents-cli setup
+   gcloud services enable aiplatform.googleapis.com developerknowledge.googleapis.com apikeys.googleapis.com
    ```
 
-2. Install the [Google Cloud Developer plugin](https://github.com/google/skills/tree/main/plugins/cloud/google-cloud-developer) and configure its Developer Knowledge API. Run only the block for your coding agent:
+3. Install and sign in to your coding agent from its official guide. Pick one: [Antigravity CLI Docs](https://antigravity.google/docs), [Claude Code Install Docs](https://code.claude.com/docs/en/overview), [OpenAI Codex CLI Docs](https://github.com/openai/codex), or [Skills CLI Docs](https://www.skills.sh/). Then install `agents-cli` onto `PATH`:
+
+   ```bash
+   uv tool install --upgrade google-agents-cli
+   uv tool update-shell && export PATH="$HOME/.local/bin:$PATH"
+   ```
+
+4. Install the [Google Cloud Developer plugin](https://github.com/google/skills/tree/main/plugins/cloud/google-cloud-developer) and configure its Developer Knowledge API. Run only the block for your coding agent:
 
    **Antigravity (`agy`):**
 
    ```bash
-   gcloud services enable aiplatform.googleapis.com developerknowledge.googleapis.com apikeys.googleapis.com
+   agents-cli setup
    agy plugin install google-cloud-developer
    export DEVELOPERKNOWLEDGE_API_KEY=$(gcloud services api-keys create \
      --display-name="dev-knowledge-mcp" \
@@ -206,19 +239,14 @@ AGENTS.md                            central coding-agent docs, contracts, and b
      agy mcp add --header "X-Goog-Api-Key: $DEVELOPERKNOWLEDGE_API_KEY" \
        developer-knowledge https://developerknowledge.googleapis.com/mcp
    else
-     echo "ERROR: API key creation failed. Replace YOUR_GCP_PROJECT_ID and re-run." >&2
+     echo "ERROR: API key creation failed. Run Step 1 and Step 2 first, then re-run." >&2
    fi
-   export AGY_ADC_AUTH=true
-   export CLOUDSDK_CORE_PROJECT=$(gcloud config get-value project)
-   export GOOGLE_CLOUD_QUOTA_PROJECT=$(gcloud config get-value project)
    ```
-
-   Run those three `export` lines in your workspace shell (not inside `.env`) so Antigravity CLI uses your trial-billed project via ADC.
 
    **Claude Code (`claude`):**
 
    ```bash
-   gcloud services enable developerknowledge.googleapis.com apikeys.googleapis.com
+   agents-cli setup
    claude plugin marketplace add google/skills
    claude plugin install google-cloud-developer@google-plugins
    export DEVELOPERKNOWLEDGE_API_KEY=$(gcloud services api-keys create \
@@ -226,14 +254,14 @@ AGENTS.md                            central coding-agent docs, contracts, and b
      --api-target=service=developerknowledge.googleapis.com \
      --format="value(response.keyString)")
    if [ -z "$DEVELOPERKNOWLEDGE_API_KEY" ]; then
-     echo "ERROR: API key creation failed. Replace YOUR_GCP_PROJECT_ID and re-run." >&2
+     echo "ERROR: API key creation failed. Run Step 1 and Step 2 first, then re-run." >&2
    fi
    ```
 
    **Codex (`codex`):**
 
    ```bash
-   gcloud services enable developerknowledge.googleapis.com apikeys.googleapis.com
+   agents-cli setup
    codex plugin marketplace add google/skills
    codex plugin add google-cloud-developer@google-plugins
    export DEVELOPERKNOWLEDGE_API_KEY=$(gcloud services api-keys create \
@@ -249,14 +277,14 @@ AGENTS.md                            central coding-agent docs, contracts, and b
    http_headers = { "X-Goog-Api-Key" = "$DEVELOPERKNOWLEDGE_API_KEY" }
    EOF
    else
-     echo "ERROR: API key creation failed. Replace YOUR_GCP_PROJECT_ID and re-run." >&2
+     echo "ERROR: API key creation failed. Run Step 1 and Step 2 first, then re-run." >&2
    fi
    ```
 
    **Cursor, VS Code, Windsurf, or other agents:**
 
    ```bash
-   gcloud services enable developerknowledge.googleapis.com apikeys.googleapis.com
+   agents-cli setup
    npx -y skills add google/agents-cli -g -y
    npx -y skills add google/skills -g \
      --skill gcloud --skill google-cloud-recipe-auth \
@@ -271,13 +299,48 @@ AGENTS.md                            central coding-agent docs, contracts, and b
      echo "MCP URL: https://developerknowledge.googleapis.com/mcp"
      echo "Header:  X-Goog-Api-Key: $DEVELOPERKNOWLEDGE_API_KEY"
    else
-     echo "ERROR: API key creation failed. Replace YOUR_GCP_PROJECT_ID and re-run." >&2
+     echo "ERROR: API key creation failed. Run Step 1 and Step 2 first, then re-run." >&2
    fi
    ```
 
-   Keep `DEVELOPERKNOWLEDGE_API_KEY` exported in your shell for Claude Code so `.mcp.json` sends your key. In Codex, a "not logged in" status next to `developer-knowledge` is normal with `http_headers` and does not block access. For other editors, add the printed URL and header under `"mcpServers"` in `.cursor/mcp.json` (or `"servers"` in `.vscode/mcp.json`).
+   Launch `claude` from this same shell for `.mcp.json` auth. In Codex, a "not logged in" status next to `developer-knowledge` is normal with `http_headers` and does not block access. For other editors, add the printed URL and header under `"mcpServers"` in `.cursor/mcp.json` (or `"servers"` in `.vscode/mcp.json`).
 
-3. Run `uv sync`, copy `.env.example` to `.env`, set `GOOGLE_CLOUD_PROJECT` (never set `TOOLBOX_URL` inside `.env`), and run `./scripts/deploy.sh`.
+5. Clone the starter repository, install dependencies, and write your active `gcloud` project ID into `.env` (never set `TOOLBOX_URL` inside `.env`):
+
+   ```bash
+   if [ ! -f agents-cli-manifest.yaml ]; then
+     [ -d shields-up-arena-starter ] || git clone https://github.com/alphinside/shields-up-arena-starter.git
+     cd shields-up-arena-starter
+   fi
+   uv sync
+   [ -f .env ] || cp .env.example .env
+   PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
+   if [ -n "$PROJECT_ID" ] && [ "$PROJECT_ID" != "(unset)" ] && [ "$PROJECT_ID" != "YOUR_GCP_PROJECT_ID" ] && [ "$PROJECT_ID" != "your-gcp-project-id" ]; then
+     sed -i.bak "s|^GOOGLE_CLOUD_PROJECT=.*|GOOGLE_CLOUD_PROJECT=$PROJECT_ID|" .env && rm -f .env.bak
+     grep '^GOOGLE_CLOUD_PROJECT=' .env
+   else
+     echo "ERROR: Set your real GCP project ID in Step 1 first, then re-run Step 5." >&2
+   fi
+   ```
+
+   If you use Antigravity (`agy`), run these three exports in the same workspace shell (not inside `.env`):
+
+   ```bash
+   PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
+   if [ -n "$PROJECT_ID" ] && [ "$PROJECT_ID" != "(unset)" ] && [ "$PROJECT_ID" != "YOUR_GCP_PROJECT_ID" ] && [ "$PROJECT_ID" != "your-gcp-project-id" ]; then
+     export AGY_ADC_AUTH=true
+     export CLOUDSDK_CORE_PROJECT="$PROJECT_ID"
+     export GOOGLE_CLOUD_QUOTA_PROJECT="$PROJECT_ID"
+   else
+     echo "ERROR: Set your real GCP project ID in Step 1 first." >&2
+   fi
+   ```
+
+6. Check that the printed `GOOGLE_CLOUD_PROJECT` line matches your project ID, then deploy the baseline agent:
+
+   ```bash
+   ./scripts/deploy.sh
+   ```
 
 ### What `scripts/deploy.sh` Provisions
 
@@ -289,10 +352,10 @@ Wait **2 to 3 minutes** after the first deploy for IAM bindings to propagate, th
 projects/<project>/locations/us-central1/reasoningEngines/<id>
 ```
 
-If you cleared `SCORER_SERVICE_ACCOUNT` in `.env` before deploying, or if the Command Center reports a `422` permission error, run:
+If you cleared `SCORER_SERVICE_ACCOUNT` in `.env` before deploying, or if the Command Center reports a `422` permission error, run `./scripts/grant-scorer.sh` (pass a custom scorer email argument if overriding `.env`):
 
 ```bash
-./scripts/grant-scorer.sh [scorer-service-account-email]
+./scripts/grant-scorer.sh
 ```
 
 ### Explore and Inspect Evaluation Traces
@@ -321,23 +384,28 @@ Always redeploy through `scripts/deploy.sh` instead of bare `agents-cli deploy`.
 
 ## Push to GitHub, Publish Your Takeaways, and Claim
 
-Complete these wrap-up steps after hardening your agent and before opening the claim page:
+Join the challenge for a chance to win cool swag. Complete Steps 1-4 below and include your hardened GitHub repository, blog post, and LinkedIn link for a chance to win **$100 in Google Cloud credits**.
 
-1. Create an empty repository at `https://github.com/new`, replace `YOUR_GITHUB_USERNAME`, point `origin` at your repo, and inspect `git status` first:
+1. Create an empty repository at `https://github.com/new` and replace `YOUR_GITHUB_REPO_URL` (for example, `https://github.com/<you>/shields-up-arena-hardened.git`) to point `origin` at your repository:
+
+   ```bash
+   git remote set-url origin YOUR_GITHUB_REPO_URL
+   ```
+
+2. Add `upstream` and inspect `git status` first:
 
    ```bash
    git remote add upstream https://github.com/alphinside/shields-up-arena-starter.git 2>/dev/null || true
-   git remote set-url origin https://github.com/YOUR_GITHUB_USERNAME/shields-up-arena-hardened.git
    git fetch upstream --quiet && git status
    ```
 
-   Confirm `git status` excludes `.env`, `deployment_metadata.json`, and local MCP config files (`.gitignore` ignores them automatically). After checking `git status`, commit and push (if fresh Cloud Shell prompts for identity, run `git config user.name` and `git config user.email` first):
+   Check that `git status` excludes `.env`, `deployment_metadata.json`, and local MCP config files (`.gitignore` ignores them automatically). After checking `git status`, commit and push (if fresh Cloud Shell prompts for identity, run `git config user.name` and `git config user.email` first):
 
    ```bash
    git add -A && git commit -m "Harden retail ADK agent for Shields Up Arena" && git push -u origin main
    ```
 
-2. Prompt your coding agent to draft and guide a personalized blog post on `dev.to`, `Medium`, or your personal blog:
+3. Prompt your coding agent to draft and guide a personalized blog post on `dev.to`, `Medium`, or your personal blog:
 
    ```text
    I want to publish my learnings about this challenge to dev.to. Inspect my git diff against upstream/main, help me create a personalized draft on my learning journey and security takeaways, and guide me on how I can post it. Follow AGENTS.md: redact project IDs and engine paths, and highlight the event via https://rsvp.withgoogle.com/events/koding-deep-dive-q4-hack-challenge-submission (not g.dev/cloud/kdd-q4-26-hack) alongside my GitHub repo.
@@ -345,9 +413,14 @@ Complete these wrap-up steps after hardening your agent and before opening the c
 
    Because `https://g.dev/cloud/kdd-q4-26-hack` is a temporary live scoring URL, always link [the event claim page](https://rsvp.withgoogle.com/events/koding-deep-dive-q4-hack-challenge-submission) in blog posts.
 
-3. Share your published blog post on LinkedIn with a short takeaway, your GitHub repo link, and [the event claim page](https://rsvp.withgoogle.com/events/koding-deep-dive-q4-hack-challenge-submission).
+4. Replace `<YOUR_BLOG_POST_URL>` and prompt your coding agent to amplify your published article on LinkedIn:
 
-4. Submit your private 8-character `submission_code` once on the [prize-claim submission page](https://rsvp.withgoogle.com/events/koding-deep-dive-q4-hack-challenge-submission):
+   ```text
+   I just published my blog post at <YOUR_BLOG_POST_URL>. Draft a concise LinkedIn post in my voice sharing my top AI agent security takeaway from this challenge, linking to my blog post, my GitHub repo, and the event page (https://rsvp.withgoogle.com/events/koding-deep-dive-q4-hack-challenge-submission).
+   ```
+
+5. Submit your private 8-character `submission_code` once on the [prize-claim submission page](https://rsvp.withgoogle.com/events/koding-deep-dive-q4-hack-challenge-submission):
+   - **Cool swag & `$100` credits:** your `submission_code` enters the cool swag draw. Adding your GitHub repository, blog post, and LinkedIn share enters the `$100` Google Cloud credits draw.
    - **One entry per Google Cloud project:** the Command Center keys entries by your canonical numeric Google Cloud project ID. You can switch browsers anytime and rename your nickname on resubmit.
    - **Keep your resource path private:** never paste your full `projects/.../reasoningEngines/...` path in public chat channels or blog posts. Anyone who copies that path could trigger a resubmit cooldown or rename your board entry.
    - **Public leaderboard privacy:** only nicknames and best scores appear publicly.
@@ -393,7 +466,7 @@ Check frozen agent and MCP contracts offline before deploying:
 uv run python scripts/check_contract.py
 ```
 
-## Verify the Starting Gaps
+## Test the Baseline Gaps
 
 Ask an ordinary question: `"What was total EMEA revenue in November 2025?"` The agent returns figures from BigQuery.
 
