@@ -44,19 +44,20 @@ echo "Ensuring custom role ${ROLE_NAME}..."
 if gcloud iam roles describe "$ROLE_ID" --project="$PROJECT" &>/dev/null; then
   DELETED=$(gcloud iam roles describe "$ROLE_ID" --project="$PROJECT" --format='value(deleted)')
   if [[ "$DELETED" == "True" ]]; then
-    gcloud iam roles undelete "$ROLE_ID" --project="$PROJECT" --quiet >/dev/null
+    gcloud iam roles undelete "$ROLE_ID" --project="$PROJECT" --quiet &>/dev/null
   fi
   gcloud iam roles update "$ROLE_ID" --project="$PROJECT" \
-    --permissions="$PERMS" --stage=GA --quiet >/dev/null
+    --permissions="$PERMS" --stage=GA --quiet &>/dev/null
 else
   gcloud iam roles create "$ROLE_ID" --project="$PROJECT" \
     --title="Shields Up Arena Scorer" \
     --description="Allows the Shields Up Arena scorer to inspect and query one agent runtime instance." \
-    --permissions="$PERMS" --stage=GA --quiet >/dev/null
+    --permissions="$PERMS" --stage=GA --quiet &>/dev/null
 fi
 
 echo "Binding ${MEMBER} on ${ENGINE_RESOURCE}..."
 # Retry briefly in case a newly created custom role is still propagating.
+last_err=""
 for attempt in 1 2 3 4; do
   ACCESS_TOKEN=$(gcloud auth print-access-token)
   CURRENT_POLICY=$(curl -fsS -X POST "${API_BASE}:getIamPolicy" \
@@ -98,20 +99,21 @@ print(json.dumps({"policy": policy}))
     exit 0
   fi
 
-  if curl -fsS -X POST "${API_BASE}:setIamPolicy" \
+  if last_err=$(curl -fsS -X POST "${API_BASE}:setIamPolicy" \
     -H "Authorization: Bearer ${ACCESS_TOKEN}" \
     -H "Content-Type: application/json" \
-    -d "$PAYLOAD" >/dev/null; then
+    -d "$PAYLOAD" 2>&1 >/dev/null); then
     echo "Granted ${ROLE_NAME} to ${MEMBER} on ${ENGINE_RESOURCE}."
     echo "IAM changes can take 2 to 3 minutes to apply before the scorer can reach the engine."
     exit 0
   fi
 
   if [[ "$attempt" -lt 4 ]]; then
-    echo "Retrying :setIamPolicy (attempt ${attempt}/4)..." >&2
+    echo "Waiting for custom role propagation (retry ${attempt}/3 in 10s)..." >&2
     sleep 10
   fi
 done
 
+echo "${last_err}" >&2
 echo "Failed to update IAM policy on ${ENGINE_RESOURCE}." >&2
 exit 1

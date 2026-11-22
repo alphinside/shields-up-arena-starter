@@ -40,8 +40,23 @@ TOOLBOX_SECRET="retail-toolbox-tools"
 TOOLBOX_SA="retail-toolbox-sa@${PROJECT}.iam.gserviceaccount.com"
 TOOLBOX_IMAGE="us-central1-docker.pkg.dev/database-toolbox/toolbox/toolbox:1.12.0"
 
-# A new service account can take a moment before IAM accepts it in a binding.
-retry() { for _ in 1 2 3 4 5 6; do "$@" && return; sleep 10; done; return 1; }
+# A new service account or secret can take a moment before IAM accepts it in a binding.
+retry() {
+  local attempt=1
+  local err=""
+  while true; do
+    if err=$("$@" 2>&1); then
+      return 0
+    fi
+    if (( attempt > 5 )); then
+      echo "${err}" >&2
+      return 1
+    fi
+    echo "  Waiting for IAM propagation (retry ${attempt}/5 in 10s)..." >&2
+    sleep 10
+    ((attempt++))
+  done
+}
 
 echo "[1/6] Checking Agents CLI version..."
 version=$(agents-cli --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n 1 || true)
@@ -81,29 +96,34 @@ else
 fi
 
 echo "[4/6] Deploying private MCP Toolbox on Cloud Run (${TOOLBOX_SERVICE})..."
-gcloud iam service-accounts describe "$TOOLBOX_SA" --project="$PROJECT" &>/dev/null ||
+if ! gcloud iam service-accounts describe "$TOOLBOX_SA" --project="$PROJECT" &>/dev/null; then
+  echo "  Creating ${TOOLBOX_SA}; waiting briefly for IAM propagation..."
   gcloud iam service-accounts create retail-toolbox-sa --project="$PROJECT" \
-    --display-name="MCP Toolbox for retail analytics agent" >/dev/null
+    --display-name="MCP Toolbox for retail analytics agent" &>/dev/null
+  sleep 5
+fi
 
+echo "  Granting BigQuery roles to ${TOOLBOX_SA}..."
 for ROLE in roles/bigquery.jobUser roles/bigquery.dataEditor; do
   retry gcloud projects add-iam-policy-binding "$PROJECT" \
     --member="serviceAccount:${TOOLBOX_SA}" --role="$ROLE" \
-    --condition=None --quiet >/dev/null
+    --condition=None --quiet
 done
 
 created_secret=0
 if gcloud secrets describe "$TOOLBOX_SECRET" --project="$PROJECT" &>/dev/null; then
   gcloud secrets versions add "$TOOLBOX_SECRET" --project="$PROJECT" \
-    --data-file=mcp-toolbox/tools.yaml >/dev/null
+    --data-file=mcp-toolbox/tools.yaml &>/dev/null
 else
   gcloud secrets create "$TOOLBOX_SECRET" --project="$PROJECT" \
-    --replication-policy=automatic --data-file=mcp-toolbox/tools.yaml >/dev/null
+    --replication-policy=automatic --data-file=mcp-toolbox/tools.yaml &>/dev/null
   created_secret=1
 fi
 
+echo "  Granting Secret Manager access to ${TOOLBOX_SA}..."
 retry gcloud secrets add-iam-policy-binding "$TOOLBOX_SECRET" --project="$PROJECT" \
   --member="serviceAccount:${TOOLBOX_SA}" --role=roles/secretmanager.secretAccessor \
-  --condition=None --quiet >/dev/null
+  --condition=None --quiet
 
 # Newly created secrets, service accounts, and Cloud Run service agents can
 # take a few seconds before Cloud Run's secret preflight sees IAM propagation.
@@ -111,6 +131,7 @@ if [[ "$created_secret" -eq 1 ]]; then
   sleep 5
 fi
 
+echo "  Deploying ${TOOLBOX_SERVICE} Cloud Run service (1 to 3 minutes)..."
 retry gcloud run deploy "$TOOLBOX_SERVICE" --project="$PROJECT" --region="$REGION" \
   --image="$TOOLBOX_IMAGE" \
   --service-account="$TOOLBOX_SA" \
@@ -132,9 +153,10 @@ agents-cli deploy --agent-identity --project="$PROJECT" --no-confirm-project \
 
 PRINCIPAL=$(uv run python scripts/engine.py principal)
 echo "  Agent Identity: ${PRINCIPAL}"
+echo "  Granting Cloud Run invoker access on ${TOOLBOX_SERVICE}..."
 retry gcloud run services add-iam-policy-binding "$TOOLBOX_SERVICE" \
   --project="$PROJECT" --region="$REGION" \
-  --member="$PRINCIPAL" --role=roles/run.invoker --quiet >/dev/null
+  --member="$PRINCIPAL" --role=roles/run.invoker --quiet
 
 echo "[6/6] Granting scorer access and warming code sandbox..."
 if [[ -n "${SCORER_SERVICE_ACCOUNT:-}" ]]; then
