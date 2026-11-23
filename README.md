@@ -115,7 +115,7 @@ Cloud Shell already includes `git`, `gcloud`, `gh`, Python, `uv`, Node.js, `agen
 
    Pick **GitHub.com**, **HTTPS**, and **Login with a web browser**.
 
-8. Point `origin` to your new GitHub repository and push the starting code (`.gitignore` keeps `.env` private automatically):
+8. Point `origin` to your new GitHub repository and push the starting code (replace `YOUR_GITHUB_REPO_URL` with your new repo's HTTPS URL, such as `https://github.com/<you>/shields-up-arena-hardened.git`). `.gitignore` keeps `.env` private automatically:
 
    ```bash
    git remote set-url origin YOUR_GITHUB_REPO_URL
@@ -159,6 +159,7 @@ Cloud Shell already includes `git`, `gcloud`, `gh`, Python, `uv`, Node.js, `agen
 
 Follow Steps 1 and 2 above, then install your CLI from its official docs ([Claude Code](https://code.claude.com/docs/en/overview), [OpenAI Codex](https://github.com/openai/codex), or [Skills CLI](https://www.skills.sh/)).
 Run the matching Step 4 block below, then continue with Steps 5 through 9.
+After Step 9, start your coding agent inside `shields-up-arena-starter` and continue to **Explore the Project** below.
 
 **Claude Code (`claude`):**
 
@@ -232,10 +233,15 @@ Add the printed URL and header under `"mcpServers"` in `.cursor/mcp.json` or `"s
 
 Install `git`, the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install), `uv`, Node.js (`npx`), and **Python 3.11–3.13**.
 
-1. Select your project, sign in to Google Cloud, check billing (`billingEnabled: true`), and enable APIs:
+1. Select your Google Cloud project first (replace `YOUR_GCP_PROJECT_ID` before pressing Enter):
 
    ```bash
    gcloud config set project YOUR_GCP_PROJECT_ID
+   ```
+
+   Then sign in to Google Cloud, check billing (`billingEnabled: true`), and enable the required APIs:
+
+   ```bash
    gcloud auth login
    gcloud auth application-default login
    gcloud billing projects describe "$(gcloud config get-value project)"
@@ -249,11 +255,12 @@ Install `git`, the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install)
    uv tool update-shell && export PATH="$HOME/.local/bin:$PATH"
    ```
 
-3. Run `agents-cli setup`, then run your coding agent's plugin and API-key commands from Step 4 above (omit `--skip-auth`).
+3. Run `agents-cli setup`. Then run the plugin and API-key commands for your agent from Step 4 above or the **Using Claude Code, Codex, or another coding agent** section. Skip the `agents-cli setup --skip-auth` line.
 4. Complete Steps 5, 6, 8, and 9 above to clone the repo, push your starting code, and deploy.
-5. To run Antigravity (`agy`) locally with your event trial credits, start it with:
+5. To run Antigravity (`agy`) locally with your event trial credits, start it inside `shields-up-arena-starter`:
 
    ```bash
+   [ -f agents-cli-manifest.yaml ] || cd shields-up-arena-starter
    PROJECT_ID=$(gcloud config get-value project) && AGY_ADC_AUTH=true CLOUDSDK_CORE_PROJECT="$PROJECT_ID" GOOGLE_CLOUD_QUOTA_PROJECT="$PROJECT_ID" agy
    ```
 
@@ -295,7 +302,7 @@ If the Command Center reports a `422` permission error, re-grant test access wit
 ## Push to GitHub, Write Your Takeaways, and Claim Rewards
 
 Submit your private 8-character `submission_code` for a chance to win cool swag.
-Complete Steps 1 through 4 below to also enter the **\$100 Google Cloud credits** draw.
+Complete Steps 1 through 4 below to also enter the **$100 Google Cloud credits** draw.
 
 1. Check `git status` first to keep `.env`, `deployment_metadata.json`, and local MCP config files untracked:
 
