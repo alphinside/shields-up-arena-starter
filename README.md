@@ -375,6 +375,8 @@ Wait **2 to 3 minutes** after the first deploy for IAM bindings to propagate, th
 projects/<project>/locations/us-central1/reasoningEngines/<id>
 ```
 
+> **Tip:** If you miss the printed resource name in terminal output, open `deployment_metadata.json` and copy the `"remote_agent_runtime_id"` value.
+
 If you cleared `SCORER_SERVICE_ACCOUNT` in `.env` before deploying, or if the Command Center reports a `422` permission error, run `./scripts/grant-scorer.sh` (pass a custom scorer email argument if overriding `.env`):
 
 ```bash
@@ -404,6 +406,8 @@ SKIP_SETUP=1 SKIP_SEED=1 ./scripts/deploy.sh
 ```
 
 Always redeploy through `scripts/deploy.sh` instead of bare `agents-cli deploy`. Bare `agents-cli deploy` skips Secret Manager and Cloud Run `retail-toolbox`, omits IAM setup, and resets the OTel trace-capture flags (`ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false`, `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT`).
+
+> **Tip:** If you miss the printed resource name in terminal output, open `deployment_metadata.json` and copy the `"remote_agent_runtime_id"` value.
 
 ## Push to GitHub, Publish Your Takeaways, and Claim
 
