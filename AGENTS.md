@@ -34,7 +34,7 @@ Keep these interfaces intact when modifying code:
 
 - **Never put `TOOLBOX_URL` in `.env`:** `agents-cli deploy` packages `.env` into agent runtime. Local runs default to `http://127.0.0.1:5000`, and `scripts/deploy.sh` passes the Cloud Run URL via `--update-env-vars`.
 - **Redeploy via `scripts/deploy.sh`:** Run `SKIP_SETUP=1 SKIP_SEED=1 ./scripts/deploy.sh` after code or `mcp-toolbox/tools.yaml` edits. Bare `agents-cli deploy` skips Secret Manager and Cloud Run `retail-toolbox`, omits `IAM` setup, and resets OpenTelemetry (`ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false`, `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT`).
-- **Model vs resource regions:** Pin `gemini-3.8-flash` to `location="global"`. Keep BigQuery, Cloud Run, agent runtime, and Model Armor in `us-central1`.
+- **Model vs resource regions:** Pin `gemini-3.5-flash-lite` to `location="global"`. Keep BigQuery, Cloud Run, agent runtime, and Model Armor in `us-central1`.
 - **Agent Identity tokens and mutual TLS (`mTLS`):** Keep `bind_id_token=False` in `toolbox_headers`. For Model Armor or other regional APIs called under Agent Identity, select `.mtls.googleapis.com` when `mtls.should_use_client_cert()` and `mtls.has_default_client_cert_source()` return true. Non-mTLS hosts reject certificate-bound tokens with HTTP `401`.
 - **IAM propagation:** Wait 2 to 3 minutes after the first deploy or a new `IAM` role grant before submitting to the Command Center.
 - **Contract checks:** Run `uv run python scripts/check_contract.py` offline before deploying (`scripts/deploy.sh` also runs it). Do not add or require `pytest` unit tests under `tests/unit/`.

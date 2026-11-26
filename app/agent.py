@@ -34,7 +34,7 @@ from google.adk.tools.mcp_tool.mcp_session_manager import (
 from google.adk.tools.skill_toolset import SkillToolset
 from google.genai import types
 
-MODEL = "gemini-3.8-flash"
+MODEL = "gemini-3.5-flash-lite"
 TOOLBOX_URL = os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5000")
 SKILLS_DIR = os.path.join(os.path.dirname(__file__), "skills")
 
@@ -75,7 +75,7 @@ root_agent = Agent(
     model=Gemini(
         model=MODEL,
         # BigQuery and Model Armor require a regional location, while
-        # gemini-3.8-flash serves only from "global".
+        # gemini-3.5-flash-lite serves from "global".
         client_kwargs={"enterprise": True, "location": "global"},
         retry_options=types.HttpRetryOptions(attempts=3),
     ),
